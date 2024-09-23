@@ -99,6 +99,8 @@ def deepdream(net, base_img, iter_n=10, octave_n=4, octave_scale=1.4,
         detail = src.data[0]-octave_base
     # returning the resulting image
     return deprocess(net, src.data[0])
+
+img = np.float32(PIL.Image.open('sky1024px.jpg'))
     
 guide = np.float32(PIL.Image.open('flowers.jpg'))
 
