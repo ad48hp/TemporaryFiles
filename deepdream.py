@@ -100,7 +100,6 @@ def deepdream(net, base_img, iter_n=10, octave_n=4, octave_scale=1.4,
     # returning the resulting image
     return deprocess(net, src.data[0])
 
-img = np.float32(PIL.Image.open('sky1024px.jpg'))
     
 guide = np.float32(PIL.Image.open('flowers.jpg'))
 
@@ -121,5 +120,6 @@ def objective_guide(dst):
     A = x.T.dot(y) # compute the matrix of dot-products with guide features
     dst.diff[0].reshape(ch,-1)[:] = y[:,A.argmax(1)] # select ones that match best
 
+img = np.float32(PIL.Image.open('sky1024px.jpg'))
 imgmy=deepdream(net, img, end=end, objective=objective_guide)
 showarray(imgmy)
