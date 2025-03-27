@@ -18,8 +18,8 @@ def showarray(a, fmt='jpeg'):
     f = StringIO()
     PIL.Image.fromarray(a).save(f, fmt)
     display(Image(data=f.getvalue()))
-    
-model_path = '' # substitute your path here
+ 
+model_path = '../caffe/models/bvlc_googlenet/' # substitute your path here
 net_fn   = model_path + 'deploy.prototxt'
 param_fn = model_path + 'bvlc_googlenet.caffemodel'
 
@@ -64,9 +64,9 @@ def make_step(net, step_size=1.5, end='inception_4c/output',
             
     if clip:
         bias = net.transformer.mean['data']
-        src.data[:] = np.clip(src.data, -bias, 255-bias)
+        src.data[:] = np.clip(src.data, -bias, 255-bias)   
         
-def deepdream(net, base_img, iter_n=3, octave_n=2, octave_scale=1.4, 
+def deepdream(net, base_img, iter_n=10, octave_n=4, octave_scale=1.4, 
               end='inception_4c/output', clip=True, **step_params):
     # prepare base images for all octaves
     octaves = [preprocess(net, base_img)]
@@ -99,27 +99,10 @@ def deepdream(net, base_img, iter_n=3, octave_n=2, octave_scale=1.4,
         detail = src.data[0]-octave_base
     # returning the resulting image
     return deprocess(net, src.data[0])
+     
 
-    
-guide = np.float32(PIL.Image.open('flowers.jpg'))
-
-end = 'inception_3b/output'
-h, w = guide.shape[:2]
-src, dst = net.blobs['data'], net.blobs[end]
-src.reshape(1,3,h,w)
-src.data[0] = preprocess(net, guide)
-net.forward(end=end)
-guide_features = dst.data[0].copy()
-
-def objective_guide(dst):
-    x = dst.data[0].copy()
-    y = guide_features
-    ch = x.shape[0]
-    x = x.reshape(ch,-1)
-    y = y.reshape(ch,-1)
-    A = x.T.dot(y) # compute the matrix of dot-products with guide features
-    dst.diff[0].reshape(ch,-1)[:] = y[:,A.argmax(1)] # select ones that match best
 
 img = np.float32(PIL.Image.open('sky1024px.jpg'))
-imgmy=deepdream(net, img, end=end, objective=objective_guide)
-showarray(imgmy)
+showarray(img)
+dd = deepdream(net, img, end='inception_3b/5x5_reduce')
+dd.save("geeks.jpg")
